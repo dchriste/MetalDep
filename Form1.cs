@@ -27,8 +27,12 @@ namespace MetalDep
         bool ActionsReClicked = false;
         bool ActionPanelShowing = false;
         bool CollectionRunning = false;
+        bool MinimizeSoon = false;
         bool MouseOnPanel = false;
         bool PanelIsMoving = false;
+        bool SettingsClicked = false;
+        bool SettingsReClicked = false;
+        bool SettingsPanelShowing = false;
         int x = 0;
         string[] portNames = new string[10];
         string[] Machines = { "PVD", "Lesker", "Leybold", "Veeco", "PCD Sputt" };
@@ -88,6 +92,10 @@ namespace MetalDep
                 if (ActionsClicked)
                 {
                     ActionsReClicked = true;
+                    if(SettingsPanelShowing)
+                    {
+                        btnSettings_Click(sender, e); //hide settings panel first
+                    }
                 }
                 else
                 {
@@ -122,7 +130,8 @@ namespace MetalDep
 
         private void FatherTime_Tick(object sender, EventArgs e)
         {
-            if ((pnlActions.Location.Y > 471) && (ActionsClicked) && (!ActionsReClicked))
+            #region Panel Actions Animate
+            if ((pnlActions.Location.Y > 471) && (!ActionPanelShowing) && (ActionsClicked) && (!ActionsReClicked))
             {
                 //location 6,562 not showing
                 if (x < 10)
@@ -164,7 +173,7 @@ namespace MetalDep
                 }
 
             }
-            else if ((pnlActions.Location.Y < 563) && (ActionsClicked) && (ActionsReClicked))
+            else if ((pnlActions.Location.Y < 563) && (!SettingsPanelShowing) && (ActionsClicked) && (ActionsReClicked))
             {
                 //location 6,492 is showing
                 if (x < 5)
@@ -194,13 +203,98 @@ namespace MetalDep
                     x = 0;
                     ActionsClicked = false;
                     ActionsReClicked = false;
-                    FatherTime.Enabled = false;
+                    if (!SettingsPanelShowing)
+                    {
+                        FatherTime.Enabled = false;
+                    }
                     this.Focus();
                     PanelIsMoving = false;
                     ActionPanelShowing = false;
+                    if (MinimizeSoon)
+                    {
+                        MinimizeSoon = false;
+                        Minimize2Tray();
+                    }
                 }
 
             }
+            #endregion
+
+            #region Settings Panel
+            if (ActionPanelShowing || SettingsPanelShowing)
+            {
+                if ((pnlSettings.Location.Y > -1) && (SettingsClicked) && (!SettingsReClicked))
+                {
+                    //location 6,562 not showing
+                    if (x < 10)
+                    {
+                        if (x == 0)
+                        {
+                            PanelIsMoving = true;
+                        }
+                        pnlSettings.SetBounds(pnlSettings.Location.X, pnlSettings.Location.Y - 4,
+                                                pnlSettings.Size.Width, pnlSettings.Size.Height);
+                        x++;
+                    }
+                    else if (x < 20)
+                    {
+                        pnlSettings.SetBounds(pnlSettings.Location.X, pnlSettings.Location.Y - 3,
+                                                pnlSettings.Size.Width, pnlSettings.Size.Height);
+                        x++;
+                    }
+                    else
+                    {
+                        x = 0;
+                        SettingsClicked = true;
+                        FatherTime.Enabled = false;
+                        pnlSettings.Focus();
+                        PanelIsMoving = false;
+                        SettingsPanelShowing = true;
+                    }
+
+                }
+                else if ((pnlSettings.Location.Y < 71) && (SettingsClicked) && (SettingsReClicked))
+                {
+                    //location 6,492 is showing
+                    if (x < 5)
+                    {
+                        if (x == 0)
+                        {
+                            PanelIsMoving = true;
+                        }
+                        pnlSettings.SetBounds(pnlSettings.Location.X, pnlSettings.Location.Y + 1,
+                                                pnlSettings.Size.Width, pnlSettings.Size.Height);
+                        x++;
+                    }
+                    else if (x < 10)
+                    {
+                        pnlSettings.SetBounds(pnlSettings.Location.X, pnlSettings.Location.Y + 4,
+                                                pnlSettings.Size.Width, pnlSettings.Size.Height);
+                        x++;
+                    }
+                    else if (x < 19)
+                    {
+                        pnlSettings.SetBounds(pnlSettings.Location.X, pnlSettings.Location.Y + 5,
+                                                pnlSettings.Size.Width, pnlSettings.Size.Height);
+                        x++;
+                    }
+                    else
+                    {
+                        x = 0;
+                        SettingsClicked = false;
+                        SettingsReClicked = false;
+                        if (!ActionsReClicked)
+                        {
+                            FatherTime.Enabled = false;
+                        }
+                        this.Focus();
+                        PanelIsMoving = false;
+                        SettingsPanelShowing = false;
+                    }
+
+                }
+            }
+            #endregion
         }
 
         private void pnlActions_Leave(object sender, EventArgs e)
@@ -290,17 +384,20 @@ namespace MetalDep
                     
 
                     //start data collection...
-                    timer_SerialRead.Enabled = true;
+                    CollectionRunning = true;
+                    timer_SerialRead.Enabled = true;                    
                     ActionsMenuToggle(sender, e); //hide action panel
                     btnStart.Text = "Stop Collection";
+                    MinimizeSoon = true;
                 }
                 else
                 {
                     //stop data collection
                     timer_SerialRead.Enabled = false;
+                    CollectionRunning = false;
                     btnStart.Text = "Start Collection";
                     ActionsMenuToggle(sender, e);
-
+                    
                     if (chkbxExcel.Checked)
                     {
                         //open csv in excel
@@ -309,6 +406,7 @@ namespace MetalDep
                         excelApp.Workbooks.OpenText(CurrentFileName);
                     }
                 }
+                this.Text = "Metal Deposition " + (CollectionRunning ? "| (Running) " : "| (Idle) ") + "| " + cmbxMachine.Items[cmbxMachine.SelectedIndex].ToString();
             }
         }
 
@@ -420,7 +518,7 @@ namespace MetalDep
                 btnQuit.Font = new Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             }
         }
-
+        /*Handles minimize to systray*/
         private void TrayIcon_MouseDown(object sender, MouseEventArgs e)
         {
             bool rightClick = (e.Button == System.Windows.Forms.MouseButtons.Right);
@@ -436,20 +534,7 @@ namespace MetalDep
             }
             else if (leftClick)
             {
-                TrayIcon.BalloonTipTitle = "Metal Deposition";
-                TrayIcon.BalloonTipText = "Collection process is: " + (CollectionRunning ? "(Running) " : "(Idle) ");
-
-                if (FormWindowState.Minimized == this.WindowState)
-                {
-                    this.Show();
-                    this.WindowState = FormWindowState.Normal;
-                }
-                else if (FormWindowState.Normal == this.WindowState)
-                {
-                    this.Hide();
-                    TrayIcon.ShowBalloonTip(500);
-                    this.WindowState = FormWindowState.Minimized;
-                }
+                Minimize2Tray();
             }
         }
         /*Allows close from systray*/
@@ -461,5 +546,43 @@ namespace MetalDep
             }
         }
 
+        private void Minimize2Tray()
+        {
+            TrayIcon.BalloonTipTitle = "Metal Deposition";
+            TrayIcon.BalloonTipText = "Collection process is: " + (CollectionRunning ? "(Running) on " + cmbxMachine.Items[cmbxMachine.SelectedIndex].ToString() : "(Idle) ");
+
+            if (FormWindowState.Minimized == this.WindowState)
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            }
+            else if (FormWindowState.Normal == this.WindowState)
+            {
+                this.Hide();
+                TrayIcon.ShowBalloonTip(500);
+                this.WindowState = FormWindowState.Minimized;
+            }
+        }
+
+        private void btnSettings_Click(object sender, EventArgs e)
+        {
+            if (!PanelIsMoving)
+            {
+                if (SettingsClicked)
+                {
+                    SettingsReClicked = true;
+                }
+                else
+                {
+                    SettingsClicked = true;
+                }
+                FatherTime.Enabled = true;
+            }
+        }
+
+        private void btnBack2Actions_Click(object sender, EventArgs e)
+        {
+            btnSettings_Click(sender, e);
+        }
     }
 }
