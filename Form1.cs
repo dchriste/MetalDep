@@ -120,6 +120,7 @@ namespace MetalDep
             if (result == DialogResult.Yes)
             {
                 //the form will close, save prefs etc.. now
+                SavePrefs();
                 SerialPort.Close(); //tie up loose ends..
             }
             else
@@ -220,7 +221,7 @@ namespace MetalDep
             }
             #endregion
 
-            #region Settings Panel
+            #region Settings Panel Animate
             if (ActionPanelShowing || SettingsPanelShowing)
             {
                 if ((pnlSettings.Location.Y > -1) && (SettingsClicked) && (!SettingsReClicked))
@@ -347,7 +348,14 @@ namespace MetalDep
         private void frmMetalDep_Load(object sender, EventArgs e)
         {
             //load preferences in here...
+            chkbxAllowClose.Checked = Properties.Settings.Default.AllowClose;
+            chkbxMinimize.Checked = Properties.Settings.Default.MinimizeAtStart;
+            chkbxExcel.Checked = Properties.Settings.Default.RunExcel;
+            cmbxMachine.SelectedIndex = Properties.Settings.Default.Machine;
+
             serialCOMcmbbx_Click(sender, e);//pre-load the combobox
+
+
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -363,6 +371,7 @@ namespace MetalDep
                     //prep output area to output stuff
                     txtbxOutput.Clear();
                     txtbxOutput.TextAlign = HorizontalAlignment.Left;
+                    txtbxOutput.Font = new Font("Century Gothic", 9F, FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 
                     if (Directory.Exists("C:\\Users\\" + Environment.UserName))
                     {
@@ -373,22 +382,36 @@ namespace MetalDep
                         saveFileDialog.InitialDirectory = "C:\\Documents and Settings\\" + Environment.UserName;
                     }
 
+                    DialogResult result; 
+
                     saveFileDialog.FileName = BaseFileName;
-                    saveFileDialog.ShowDialog();
-                    CurrentFileName = GenerateFileName(saveFileDialog.FileName);
-                    txtbxOutput.Text = "Collecting Data in file: " + CurrentFileName;
+                    result = saveFileDialog.ShowDialog();
+                    if (result == DialogResult.Cancel)
+                    {
+                        txtbxOutput.TextAlign = HorizontalAlignment.Center;
+                        txtbxOutput.Font = new Font("Century Gothic", 12F, FontStyle.Bold | FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                        txtbxOutput.Text = "Start of collection aborted!";
+                    }
+                    else
+                    {
+                        CurrentFileName = GenerateFileName(saveFileDialog.FileName);
+                        txtbxOutput.Text = "Collecting Data in file: " + CurrentFileName;
 
-                    // this shows the operation of csv creation
-                    WriteToFile("Silver,0.2,11");
-                    WriteToFile("Gold,0.1,12");
-                    
+                        // this shows the operation of csv creation
+                        WriteToFile("Silver,0.2,11");
+                        WriteToFile("Gold,0.1,12");
 
-                    //start data collection...
-                    CollectionRunning = true;
-                    timer_SerialRead.Enabled = true;                    
-                    ActionsMenuToggle(sender, e); //hide action panel
-                    btnStart.Text = "Stop Collection";
-                    MinimizeSoon = true;
+
+                        //start data collection...
+                        CollectionRunning = true;
+                        timer_SerialRead.Enabled = true;
+                        ActionsMenuToggle(sender, e); //hide action panel
+                        btnStart.Text = "Stop Collection";
+                        if (chkbxMinimize.Checked)
+                        {
+                            MinimizeSoon = true;
+                        }
+                    }
                 }
                 else
                 {
@@ -428,8 +451,31 @@ namespace MetalDep
                     //MessageBox.Show(tempString); //testing
                     RX_Data = tempString;
                     tempString = null;
+                    
                     //call function to parse data?
-                    WriteToFile(RX_Data);
+                    switch (cmbxMachine.Items[cmbxMachine.SelectedIndex].ToString())
+                    {
+                        case ("PVD"):
+                            //blah
+                            break;
+                        case ("Lesker"):
+                            //blah
+                            break;
+                        case ("Leybold"):
+                            //blah
+                            Communicate2Inficon880(RX_Data);
+                            break;
+                        case ("Veeco"):
+                            //blah
+                            break;
+                        case ("PCD Sputt"):
+                            //blah
+                            break;
+                        default:
+                            //what happened??!!??
+                            DispMsg("REALLY!?!?");
+                            break;
+                    }
                 }
             }
         }
@@ -446,7 +492,7 @@ namespace MetalDep
             }
 
             //change the way we talk based on machine
-
+            //done in serial timer tick event
         }
 
         #region Mouse sensing
@@ -509,11 +555,13 @@ namespace MetalDep
         {
             if (!chkbxAllowClose.Checked)
             {
+                chkbxAllowClose.Text = "Allow Close ?";
                 this.ControlBox = false;
                 btnQuit.Font = new Font("Century Gothic", 10F, FontStyle.Bold | FontStyle.Strikeout, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             }
             else
             {
+                chkbxAllowClose.Text = "Allow Close " + "\u2713"; //✓
                 this.ControlBox = true;
                 btnQuit.Font = new Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             }
@@ -583,6 +631,73 @@ namespace MetalDep
         private void btnBack2Actions_Click(object sender, EventArgs e)
         {
             btnSettings_Click(sender, e);
+        }
+
+        private void Communicate2Inficon880(string DataRXd)
+        {
+            //for testing
+            DisplaySerialData_Hex(DataRXd);
+
+        }
+
+        /*Modified method, courtesy of: http://csharpindepth.com/Articles/General/strings.aspx */
+        private void DisplaySerialData_Hex(string chars2disp)
+        {
+            string[] LowNames = 
+            {"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS",
+                "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2",
+                "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", 
+                "FS", "GS", "RS", "US"};
+
+            txtbxOutput.Text = String.Format("String length: {0}", chars2disp.Length) + Environment.NewLine;
+            foreach (char c in chars2disp)
+            {
+                if (c < 32)
+                {
+                    txtbxOutput.Text += String.Format("<{0}> U+{1:x4}", LowNames[c], (int)c) + Environment.NewLine;
+                }
+                else if (c > 127)
+                {
+                    txtbxOutput.Text += String.Format("(Possibly non-printable) U+{0:x4}", (int)c) + Environment.NewLine;
+                }
+                else
+                {
+                    txtbxOutput.Text += String.Format("{0} U+{1:x4}", c, (int)c) + Environment.NewLine;
+                }
+            }
+        }
+
+        private void SavePrefs()
+        {
+            Properties.Settings.Default.AllowClose = chkbxAllowClose.Checked;
+            Properties.Settings.Default.MinimizeAtStart = chkbxMinimize.Checked;
+            Properties.Settings.Default.RunExcel = chkbxExcel.Checked;
+            Properties.Settings.Default.Machine = (byte) cmbxMachine.SelectedIndex;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkbxExcel_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkbxExcel.Checked)
+            {
+                chkbxExcel.Text = "Run Excel " + '\u2713';
+            }
+            else
+            {
+                chkbxExcel.Text = "Run Excel ?";
+            }
+        }
+
+        private void chkbxMinimize_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkbxMinimize.Checked)
+            {
+                chkbxMinimize.Text = "Minimize at Start " + '\u2713';
+            }
+            else
+            {
+                chkbxMinimize.Text = "Minimize at Start ?";
+            }
         }
     }
 }

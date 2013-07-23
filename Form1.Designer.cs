@@ -33,8 +33,12 @@
             this.cmbxMachine = new System.Windows.Forms.ComboBox();
             this.btnStart = new System.Windows.Forms.Button();
             this.pnlActions = new System.Windows.Forms.Panel();
+            this.pnlSettings = new System.Windows.Forms.Panel();
+            this.chkbxMinimize = new System.Windows.Forms.CheckBox();
+            this.btnBack2Actions = new System.Windows.Forms.Button();
             this.chkbxAllowClose = new System.Windows.Forms.CheckBox();
             this.chkbxExcel = new System.Windows.Forms.CheckBox();
+            this.btnSettings = new System.Windows.Forms.Button();
             this.btnQuit = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.txtbxOutput = new System.Windows.Forms.TextBox();
@@ -46,12 +50,9 @@
             this.timer_SerialRead = new System.Windows.Forms.Timer(this.components);
             this.lblTriggerActionPanel = new System.Windows.Forms.Label();
             this.TrayIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.pnlSettings = new System.Windows.Forms.Panel();
-            this.btnSettings = new System.Windows.Forms.Button();
-            this.btnBack2Actions = new System.Windows.Forms.Button();
             this.pnlActions.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picbxMetalDep)).BeginInit();
             this.pnlSettings.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picbxMetalDep)).BeginInit();
             this.SuspendLayout();
             // 
             // cmbxMachine
@@ -106,40 +107,120 @@
             this.pnlActions.MouseLeave += new System.EventHandler(this.pnlActions_MouseLeave);
             this.pnlActions.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pnlActions_MouseMove);
             // 
+            // pnlSettings
+            // 
+            this.pnlSettings.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.pnlSettings.BackColor = System.Drawing.Color.DarkGoldenrod;
+            this.pnlSettings.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlSettings.Controls.Add(this.chkbxMinimize);
+            this.pnlSettings.Controls.Add(this.btnBack2Actions);
+            this.pnlSettings.Controls.Add(this.chkbxAllowClose);
+            this.pnlSettings.Controls.Add(this.chkbxExcel);
+            this.pnlSettings.Location = new System.Drawing.Point(0, 70);
+            this.pnlSettings.Name = "pnlSettings";
+            this.pnlSettings.Size = new System.Drawing.Size(437, 70);
+            this.pnlSettings.TabIndex = 7;
+            // 
+            // chkbxMinimize
+            // 
+            this.chkbxMinimize.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chkbxMinimize.BackColor = System.Drawing.Color.Black;
+            this.chkbxMinimize.Checked = true;
+            this.chkbxMinimize.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkbxMinimize.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.chkbxMinimize.FlatAppearance.BorderSize = 2;
+            this.chkbxMinimize.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.chkbxMinimize.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
+            this.chkbxMinimize.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
+            this.chkbxMinimize.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chkbxMinimize.Font = new System.Drawing.Font("Arial Unicode MS", 8F, System.Drawing.FontStyle.Bold);
+            this.chkbxMinimize.Location = new System.Drawing.Point(128, 3);
+            this.chkbxMinimize.Name = "chkbxMinimize";
+            this.chkbxMinimize.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            this.chkbxMinimize.Size = new System.Drawing.Size(135, 28);
+            this.chkbxMinimize.TabIndex = 10;
+            this.chkbxMinimize.Text = "Minimize on Start ✓";
+            this.chkbxMinimize.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chkbxMinimize.UseVisualStyleBackColor = false;
+            this.chkbxMinimize.CheckedChanged += new System.EventHandler(this.chkbxMinimize_CheckedChanged);
+            // 
+            // btnBack2Actions
+            // 
+            this.btnBack2Actions.BackColor = System.Drawing.Color.Black;
+            this.btnBack2Actions.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(75)))), ((int)(((byte)(75)))), ((int)(((byte)(75)))));
+            this.btnBack2Actions.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.btnBack2Actions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBack2Actions.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBack2Actions.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.btnBack2Actions.Location = new System.Drawing.Point(356, 8);
+            this.btnBack2Actions.Name = "btnBack2Actions";
+            this.btnBack2Actions.Size = new System.Drawing.Size(65, 50);
+            this.btnBack2Actions.TabIndex = 9;
+            this.btnBack2Actions.Text = "Back";
+            this.btnBack2Actions.UseVisualStyleBackColor = false;
+            this.btnBack2Actions.Click += new System.EventHandler(this.btnBack2Actions_Click);
+            // 
             // chkbxAllowClose
             // 
+            this.chkbxAllowClose.Appearance = System.Windows.Forms.Appearance.Button;
             this.chkbxAllowClose.BackColor = System.Drawing.Color.Black;
             this.chkbxAllowClose.Checked = true;
             this.chkbxAllowClose.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkbxAllowClose.FlatAppearance.BorderSize = 0;
+            this.chkbxAllowClose.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.chkbxAllowClose.FlatAppearance.BorderSize = 2;
+            this.chkbxAllowClose.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.chkbxAllowClose.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
+            this.chkbxAllowClose.FlatAppearance.MouseOverBackColor = System.Drawing.Color.DarkGray;
             this.chkbxAllowClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.chkbxAllowClose.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkbxAllowClose.Font = new System.Drawing.Font("Arial Unicode MS", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.chkbxAllowClose.Location = new System.Drawing.Point(14, 37);
             this.chkbxAllowClose.Name = "chkbxAllowClose";
             this.chkbxAllowClose.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.chkbxAllowClose.Size = new System.Drawing.Size(101, 22);
+            this.chkbxAllowClose.Size = new System.Drawing.Size(108, 28);
             this.chkbxAllowClose.TabIndex = 6;
-            this.chkbxAllowClose.Text = "Allow Close ?";
+            this.chkbxAllowClose.Text = "Allow Close ✓";
             this.chkbxAllowClose.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chkbxAllowClose.UseVisualStyleBackColor = false;
             this.chkbxAllowClose.CheckedChanged += new System.EventHandler(this.chkbxAllowClose_CheckedChanged);
             // 
             // chkbxExcel
             // 
+            this.chkbxExcel.Appearance = System.Windows.Forms.Appearance.Button;
             this.chkbxExcel.BackColor = System.Drawing.Color.Black;
             this.chkbxExcel.Checked = true;
             this.chkbxExcel.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkbxExcel.FlatAppearance.BorderSize = 0;
+            this.chkbxExcel.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.chkbxExcel.FlatAppearance.BorderSize = 2;
+            this.chkbxExcel.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.chkbxExcel.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
+            this.chkbxExcel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
             this.chkbxExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.chkbxExcel.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chkbxExcel.Location = new System.Drawing.Point(14, 9);
+            this.chkbxExcel.Font = new System.Drawing.Font("Arial Unicode MS", 8F, System.Drawing.FontStyle.Bold);
+            this.chkbxExcel.Location = new System.Drawing.Point(14, 3);
             this.chkbxExcel.Name = "chkbxExcel";
             this.chkbxExcel.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.chkbxExcel.Size = new System.Drawing.Size(101, 22);
+            this.chkbxExcel.Size = new System.Drawing.Size(108, 28);
             this.chkbxExcel.TabIndex = 5;
-            this.chkbxExcel.Text = "Run Excel ?";
+            this.chkbxExcel.Text = "Run Excel ✓";
             this.chkbxExcel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chkbxExcel.UseVisualStyleBackColor = false;
+            this.chkbxExcel.CheckedChanged += new System.EventHandler(this.chkbxExcel_CheckedChanged);
+            // 
+            // btnSettings
+            // 
+            this.btnSettings.BackColor = System.Drawing.Color.Black;
+            this.btnSettings.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(75)))), ((int)(((byte)(75)))), ((int)(((byte)(75)))));
+            this.btnSettings.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.btnSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSettings.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSettings.ForeColor = System.Drawing.Color.DarkGoldenrod;
+            this.btnSettings.Location = new System.Drawing.Point(248, 9);
+            this.btnSettings.Name = "btnSettings";
+            this.btnSettings.Size = new System.Drawing.Size(103, 50);
+            this.btnSettings.TabIndex = 8;
+            this.btnSettings.Text = "Settings";
+            this.btnSettings.UseVisualStyleBackColor = false;
+            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             // 
             // btnQuit
             // 
@@ -219,6 +300,8 @@
             // 
             // saveFileDialog
             // 
+            this.saveFileDialog.DefaultExt = "csv";
+            this.saveFileDialog.Filter = "Comma Separated Values | *.csv";
             this.saveFileDialog.RestoreDirectory = true;
             this.saveFileDialog.Title = "Where shall we save it?";
             // 
@@ -232,11 +315,12 @@
             this.lblTriggerActionPanel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.lblTriggerActionPanel.BackColor = System.Drawing.Color.Black;
             this.lblTriggerActionPanel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.lblTriggerActionPanel.Location = new System.Drawing.Point(51, 541);
+            this.lblTriggerActionPanel.Font = new System.Drawing.Font("Arial Unicode MS", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTriggerActionPanel.Location = new System.Drawing.Point(51, 537);
             this.lblTriggerActionPanel.Name = "lblTriggerActionPanel";
-            this.lblTriggerActionPanel.Size = new System.Drawing.Size(346, 19);
+            this.lblTriggerActionPanel.Size = new System.Drawing.Size(346, 24);
             this.lblTriggerActionPanel.TabIndex = 6;
-            this.lblTriggerActionPanel.Text = "| ^ |          Actions          | ^ |";
+            this.lblTriggerActionPanel.Text = "| ⇧ |          Actions          | ⇧ |";
             this.lblTriggerActionPanel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblTriggerActionPanel.MouseHover += new System.EventHandler(this.lblTriggerActionPanel_MouseHover);
             // 
@@ -248,51 +332,6 @@
             this.TrayIcon.Text = "Click to Minimize.";
             this.TrayIcon.Visible = true;
             this.TrayIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TrayIcon_MouseDown);
-            // 
-            // pnlSettings
-            // 
-            this.pnlSettings.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.pnlSettings.BackColor = System.Drawing.Color.DarkGoldenrod;
-            this.pnlSettings.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnlSettings.Controls.Add(this.btnBack2Actions);
-            this.pnlSettings.Controls.Add(this.chkbxAllowClose);
-            this.pnlSettings.Controls.Add(this.chkbxExcel);
-            this.pnlSettings.Location = new System.Drawing.Point(0, 70);
-            this.pnlSettings.Name = "pnlSettings";
-            this.pnlSettings.Size = new System.Drawing.Size(437, 70);
-            this.pnlSettings.TabIndex = 7;
-            // 
-            // btnSettings
-            // 
-            this.btnSettings.BackColor = System.Drawing.Color.Black;
-            this.btnSettings.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(75)))), ((int)(((byte)(75)))), ((int)(((byte)(75)))));
-            this.btnSettings.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.btnSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSettings.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSettings.ForeColor = System.Drawing.Color.DarkGoldenrod;
-            this.btnSettings.Location = new System.Drawing.Point(248, 9);
-            this.btnSettings.Name = "btnSettings";
-            this.btnSettings.Size = new System.Drawing.Size(103, 50);
-            this.btnSettings.TabIndex = 8;
-            this.btnSettings.Text = "Settings";
-            this.btnSettings.UseVisualStyleBackColor = false;
-            this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
-            // 
-            // btnBack2Actions
-            // 
-            this.btnBack2Actions.BackColor = System.Drawing.Color.Black;
-            this.btnBack2Actions.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(75)))), ((int)(((byte)(75)))), ((int)(((byte)(75)))));
-            this.btnBack2Actions.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.btnBack2Actions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBack2Actions.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBack2Actions.ForeColor = System.Drawing.Color.DarkGoldenrod;
-            this.btnBack2Actions.Location = new System.Drawing.Point(356, 8);
-            this.btnBack2Actions.Name = "btnBack2Actions";
-            this.btnBack2Actions.Size = new System.Drawing.Size(65, 50);
-            this.btnBack2Actions.TabIndex = 9;
-            this.btnBack2Actions.Text = "Back";
-            this.btnBack2Actions.UseVisualStyleBackColor = false;
-            this.btnBack2Actions.Click += new System.EventHandler(this.btnBack2Actions_Click);
             // 
             // frmMetalDep
             // 
@@ -323,8 +362,8 @@
             this.Load += new System.EventHandler(this.frmMetalDep_Load);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.frmMetalDep_MouseMove);
             this.pnlActions.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picbxMetalDep)).EndInit();
             this.pnlSettings.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picbxMetalDep)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -351,6 +390,7 @@
         private System.Windows.Forms.Panel pnlSettings;
         private System.Windows.Forms.Button btnSettings;
         private System.Windows.Forms.Button btnBack2Actions;
+        private System.Windows.Forms.CheckBox chkbxMinimize;
     }
 }
 
