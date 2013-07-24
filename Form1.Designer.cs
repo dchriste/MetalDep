@@ -34,6 +34,7 @@
             this.btnStart = new System.Windows.Forms.Button();
             this.pnlActions = new System.Windows.Forms.Panel();
             this.pnlSettings = new System.Windows.Forms.Panel();
+            this.chkbxDebug = new System.Windows.Forms.CheckBox();
             this.chkbxMinimize = new System.Windows.Forms.CheckBox();
             this.btnBack2Actions = new System.Windows.Forms.Button();
             this.chkbxAllowClose = new System.Windows.Forms.CheckBox();
@@ -66,7 +67,10 @@
             "Lesker",
             "Leybold",
             "Veeco",
-            "PCD Sputt"});
+            "PCD Sputt",
+            "CHA",
+            "AIRCO",
+            "Varian"});
             this.cmbxMachine.Location = new System.Drawing.Point(51, 82);
             this.cmbxMachine.Name = "cmbxMachine";
             this.cmbxMachine.Size = new System.Drawing.Size(144, 25);
@@ -112,6 +116,7 @@
             this.pnlSettings.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pnlSettings.BackColor = System.Drawing.Color.DarkGoldenrod;
             this.pnlSettings.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlSettings.Controls.Add(this.chkbxDebug);
             this.pnlSettings.Controls.Add(this.chkbxMinimize);
             this.pnlSettings.Controls.Add(this.btnBack2Actions);
             this.pnlSettings.Controls.Add(this.chkbxAllowClose);
@@ -120,6 +125,29 @@
             this.pnlSettings.Name = "pnlSettings";
             this.pnlSettings.Size = new System.Drawing.Size(437, 70);
             this.pnlSettings.TabIndex = 7;
+            // 
+            // chkbxDebug
+            // 
+            this.chkbxDebug.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chkbxDebug.BackColor = System.Drawing.Color.Black;
+            this.chkbxDebug.Checked = true;
+            this.chkbxDebug.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkbxDebug.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.chkbxDebug.FlatAppearance.BorderSize = 2;
+            this.chkbxDebug.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.chkbxDebug.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Silver;
+            this.chkbxDebug.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
+            this.chkbxDebug.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chkbxDebug.Font = new System.Drawing.Font("Arial Unicode MS", 8F, System.Drawing.FontStyle.Bold);
+            this.chkbxDebug.Location = new System.Drawing.Point(128, 37);
+            this.chkbxDebug.Name = "chkbxDebug";
+            this.chkbxDebug.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            this.chkbxDebug.Size = new System.Drawing.Size(135, 28);
+            this.chkbxDebug.TabIndex = 11;
+            this.chkbxDebug.Text = "Debugging Mode ✓";
+            this.chkbxDebug.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chkbxDebug.UseVisualStyleBackColor = false;
+            this.chkbxDebug.CheckedChanged += new System.EventHandler(this.chkbxDebug_CheckedChanged);
             // 
             // chkbxMinimize
             // 
@@ -267,6 +295,7 @@
             this.txtbxOutput.TabIndex = 3;
             this.txtbxOutput.Text = "Start a Collection. Use the Actions menu below!";
             this.txtbxOutput.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtbxOutput.TextChanged += new System.EventHandler(this.txtbxOutput_TextChanged);
             this.txtbxOutput.MouseMove += new System.Windows.Forms.MouseEventHandler(this.txtbxOutput_MouseMove);
             // 
             // FatherTime
@@ -391,6 +420,7 @@
         private System.Windows.Forms.Button btnSettings;
         private System.Windows.Forms.Button btnBack2Actions;
         private System.Windows.Forms.CheckBox chkbxMinimize;
+        private System.Windows.Forms.CheckBox chkbxDebug;
     }
 }
 

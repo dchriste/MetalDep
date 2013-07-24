@@ -35,12 +35,130 @@ namespace MetalDep
         bool SettingsPanelShowing = false;
         int x = 0;
         string[] portNames = new string[10];
-        string[] Machines = { "PVD", "Lesker", "Leybold", "Veeco", "PCD Sputt" };
+        string[] Machines = { "PVD", "Lesker", "Leybold", "Veeco", "PCD Sputt", "CHA", "AIRCO", "Varian" };
         string BaseFileName = "MetalDep_CollectedData";
         string CurrentFileName = "";
         string RX_Data = "";
         string tempString = "";
         #endregion
+
+        #region Element Table
+
+        public struct Elements
+        {
+            public string[] Name;
+            public string[] Symbol;
+            public double[] Density;
+            public double[] Zfactor;
+
+            public Elements(string[] name, string[] symbol, double[] density, double[] zfactor)
+            {
+                Name = name;
+                Symbol = symbol;
+                Density = density;
+                Zfactor = zfactor;
+            }
+        }
+        private string[] materials = { "Aluminum", "Aluminum-Oxide", "Antimony", "Arsenic", "Barium", "Beryllium", 
+                               "Bismuth", "Bismuth-Oxide", "Boron", "Cadmium", "Cadmium-Selenide", "Cadmium-Sulfide", 
+                               "Cadmium-Telluride", "Calcium", "Calcium-Fluoride", "Carbon_Diamond", "Carbon_Graphite", 
+                               "Cerium3-Fluoride", "Cerium4-Oxide", "Chromium", "Chromium3-Oxide", "Cobalt", "Copper", 
+                               "Copper1-SulfideA", "Copper1-SulfideB", "Copper3-Sulfide", "Dysprosium", "Erbium", 
+                               "Gadolinium", "Gallium", "Gallium-Arsenide", "Germanium", "Gold", "Hafnium", 
+                               "Hafnium-Oxide", "Holnium", "Indium", "Indium-Intimonide", "Indium-Oxide", "Iridium", 
+                               "Iron", "Lanthanum", "Lanthanum-Fluoride", "Lanthanum-Oxide", "Lead", "Lead-Sulfide", 
+                               "Lithium", "Lithium-Fluoride", "Magnesium", "Magnesium-Fluoride", "Magnesium-Oxide", 
+                               "Manganese", "Manganese2-Sulfide", "Mercury", "Molybdenum", "Neodynium-Fluoride", 
+                               "Neodynium-Oxide", "Nickel", "Niobium", "Niobium5-Oxide", "Palladium", "Platinum", 
+                               "Potasium-Chloride", "Rhenium", "Rhodium", "Rubidium", "Samarium", "Scandium", 
+                               "Selenium", "Silicon", "Silicon2-Oxide", "Silicon-Dioxide", "Silver", "Silver-Bromide", 
+                               "Silver-Chloride", "Sodium", "Sodium-Chloride", "Sulfur", "Tantalum", "Tantalum4-Oxide", 
+                               "Tellurium", "Terbium", "Thallium", "Thorium4-Fluoride", "Tin", "Titanium", "Titanium4-Oxide", 
+                               "Titanium-Oxide", "Tungsten", "Tungsten-Carbide", "Uranium", "Vanadium", "Ytterbium", 
+                               "Yttrium", "Yttrium-Oxide", "Zinc", "Zinc-Oxide", "Zinc-Selenide", "Zinc-Sulfide", "Zirconium", 
+                               "Zirconium-Oxide" };
+        private string[] symbols = { "Al", "Al2O3", "Sb", "As", "Ba", "Be", "Bi", "Bi2O3", "B", "Cd", "Cdse", "Cds", "Cdte", 
+                                     "Ca", "CaF2", "C", "C", "CeF3", "CeO2", "Cr", "Cr2O3", "Co", "Cu", "Cu2S-A", "Cu2S-B", 
+                                     "CuS", "Dy", "Er", "Gd", "Ga", "GaAs", "Ge", "Au", "Hf", "HfO2", "Ho", "In", "InSb", 
+                                     "In2O3", "Ir", "Fe", "La", "LaF3", "LaO3", "Pb", "PbS", "Li", "LiF", "Mg", "MgF2", 
+                                     "MgO", "Mn", "MnS", "Hg", "Mo", "NdF3", "Nd2O3", "Ni", "Nb", "Nb2O5", "Pd", "Pt", "KCl", 
+                                     "Re", "Rh", "Rb", "Sm", "Sc", "Se", "Si", "SiO", "SiO2", "Ag", "AgBr", "AgCl", "Na", 
+                                     "NaCl", "S", "Ta", "Ta2O5", "Te", "Tb", "Tl", "ThF4", "Sn", "Ti", "TiO2", "TiO", "W", 
+                                     "WC", "U", "V", "Yb", "Y", "Y2O3", "Zn", "ZnO", "ZnSe", "ZnS", "Zr", "ZrO2" };
+        private double[] densities = { 2.73, 3.97, 6.62, 5.73, 3.5, 1.85, 9.8, 8.9, 2.54, 8.64, 5.81, 4.83, 5.85, 1.55, 3.18, 
+                                       3.52, 2.25, 6.16, 7.13, 7.2, 5.21, 8.71, 8.93, 5.6, 5.8, 4.6, 8.54, 9.05, 7.89, 5.93, 
+                                       5.31, 5.35, 19.3, 13.1, 9.63, 8.8, 7.3, 5.76, 7.18, 22.4, 7.86, 6.17, 5.94, 6.51, 11.3, 
+                                       7.5, 0.53, 2.64, 1.74, 3, 3.58, 7.2, 3.99, 13.46, 10.2, 6.506, 7.24, 8.91, 8.57, 4.47, 
+                                       12, 21.4, 1.98, 21.04, 12.41, 1.53, 7.54, 3, 4.82, 2.32, 2.13, 2.2, 10.5, 6.47, 5.56, 
+                                       0.97, 2.17, 2.07, 16.6, 8.2, 6.25, 8.27, 11.85, 6.32, 7.3, 4.5, 4.26, 4.9, 19.3, 15.6, 
+                                       18.7, 5.96, 6.98, 4.34, 5.01, 7.04, 5.61, 5.26, 4.09, 6.51, 5.6 };
+        private double[] zfactors = { 1.08, 0.0, 0.768, 0.966, 2.1, 0.543, 0.79, 0.0, 0.389, 0.682, 0.0, 1.02, 0.98, 2.62, 0.775,
+                                      0.22, 3.26, 0.0, 0.0, 0.305, 0.0, 0.343, 0.437, 0.69, 0.67, 0.82, 0.6, 0.74, 0.67, 0.593, 1.59, 
+                                      0.516, 0.381, 0.36, 0.0, 0.58, 1.65, 0.769, 0.0, 0.129, 0.349, 0.92, 0.0, 0.0, 1.13, 0.566, 5.9, 
+                                      0.774, 1.61, 0.0, 0.411, 0.377, 0.94, 0.74, 0.257, 0.0, 0.0, 0.331, 0.493, 0.0, 0.357, 0.245, 
+                                      2.05, 0.15, 0.21, 2.54, 0.89, 0.91, 0.864, 0.712, 0.87, 1.07, 0.529, 1.18, 1.32, 4.8, 1.57, 2.29, 
+                                      0.262, 0.3, 0.9, 0.66, 1.55, 0.0, 0.724, 0.628, 0.4, 0.0, 0.163, 0.151, 0.238, 0.53, 1.13, 0.835, 
+                                      0.0, 0.514, 0.556, 0.722, 0.775, 0.6, 0.0 };
+        private Elements ElementTable = new Elements();
+        #endregion
+
+        #region 880 Commands
+        public struct Parameter
+        {
+            public string DENS;
+            public string ZRAT;
+            public string STHK;
+
+            public Parameter(string dens, string zrat, string sthk)
+            {
+                DENS = dens;
+                ZRAT = zrat;
+                STHK = sthk;
+
+            }
+        }
+        
+        public struct Commands
+        {
+            public Parameter Param;
+            public string EXCT_whatv;
+            public string EXCT_rdfp;
+            public string EXCT_wrfp;
+
+            public Commands(Parameter param, string whatv, string rdfp, string wrfp)
+            {
+                EXCT_whatv = whatv;
+                EXCT_rdfp = rdfp;
+                EXCT_wrfp = wrfp;
+                Param = param;
+
+            }
+            
+        }
+
+        private Commands cmd880 = new Commands();
+        
+        #endregion
+
+        private void InitConstants()
+        {
+            ElementTable.Name = materials;
+            ElementTable.Symbol = symbols;
+            ElementTable.Density = densities;
+            ElementTable.Zfactor = zfactors;
+
+            /***Commands***/
+
+            cmd880.EXCT_whatv = "@";
+            cmd880.EXCT_rdfp = "A";
+            cmd880.EXCT_wrfp = "B";
+
+            /***Params***/
+            cmd880.Param.DENS = "1";
+            cmd880.Param.ZRAT = "2";
+            cmd880.Param.STHK = "6";
+
+        }
 
         private void DispMsg(string msg2disp)
         {
@@ -347,6 +465,7 @@ namespace MetalDep
 
         private void frmMetalDep_Load(object sender, EventArgs e)
         {
+            InitConstants(); //Load Structs
             //load preferences in here...
             chkbxAllowClose.Checked = Properties.Settings.Default.AllowClose;
             chkbxMinimize.Checked = Properties.Settings.Default.MinimizeAtStart;
@@ -388,12 +507,14 @@ namespace MetalDep
                     result = saveFileDialog.ShowDialog();
                     if (result == DialogResult.Cancel)
                     {
+                        //the user decided against starting
                         txtbxOutput.TextAlign = HorizontalAlignment.Center;
                         txtbxOutput.Font = new Font("Century Gothic", 12F, FontStyle.Bold | FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                         txtbxOutput.Text = "Start of collection aborted!";
                     }
                     else
                     {
+                        //we are going through with it.
                         CurrentFileName = GenerateFileName(saveFileDialog.FileName);
                         txtbxOutput.Text = "Collecting Data in file: " + CurrentFileName;
 
@@ -407,6 +528,9 @@ namespace MetalDep
                         timer_SerialRead.Enabled = true;
                         ActionsMenuToggle(sender, e); //hide action panel
                         btnStart.Text = "Stop Collection";
+
+                        //SendMSG(EXCT_whatv); 
+
                         if (chkbxMinimize.Checked)
                         {
                             MinimizeSoon = true;
@@ -636,7 +760,11 @@ namespace MetalDep
         private void Communicate2Inficon880(string DataRXd)
         {
             //for testing
-            DisplaySerialData_Hex(DataRXd);
+            DispMsg("We received this: " + Environment.NewLine + DataRXd);
+            if (chkbxDebug.Checked)
+            {
+                DisplaySerialData_Hex(DataRXd);
+            }
 
         }
 
@@ -654,7 +782,7 @@ namespace MetalDep
             {
                 if (c < 32)
                 {
-                    txtbxOutput.Text += String.Format("<{0}> U+{1:x4}", LowNames[c], (int)c) + Environment.NewLine;
+                    txtbxOutput.Text += String.Format("<{0}>\t U+{1:x4}", LowNames[c], (int)c) + Environment.NewLine;
                 }
                 else if (c > 127)
                 {
@@ -662,7 +790,7 @@ namespace MetalDep
                 }
                 else
                 {
-                    txtbxOutput.Text += String.Format("{0} U+{1:x4}", c, (int)c) + Environment.NewLine;
+                    txtbxOutput.Text += String.Format("{0}\t U+{1:x4}", c, (int)c) + Environment.NewLine;
                 }
             }
         }
@@ -697,6 +825,42 @@ namespace MetalDep
             else
             {
                 chkbxMinimize.Text = "Minimize at Start ?";
+            }
+        }
+
+        private void chkbxDebug_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkbxDebug.Checked)
+            {
+                chkbxDebug.Text = "Debugging Mode " + '\u2713';
+            }
+            else
+            {
+                chkbxDebug.Text = "Debugging Mode ?";
+            }
+        }
+        /*This method decides when the scroll bars ought to be shown*/
+        private void txtbxOutput_TextChanged(object sender, EventArgs e)
+        {
+            if (txtbxOutput.Lines.Length >= 23)
+            {
+                txtbxOutput.ScrollBars = ScrollBars.Vertical;
+            }
+            else
+            {
+                txtbxOutput.ScrollBars = ScrollBars.None;
+            }
+        }
+
+        private void SendMSG(string Message2Send)
+        {
+            if (SerialPort.IsOpen == true)
+            {
+                SerialPort.WriteLine('$' + Message2Send + '\x0D'); // begin with $ as stx and end with CR as etx
+            }
+            else
+            {
+                DispMsg("serial message send fail");
             }
         }
     }
