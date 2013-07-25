@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Text.RegularExpressions;
 
 namespace MetalDep
 {
@@ -26,18 +27,38 @@ namespace MetalDep
         bool ActionsClicked = false;
         bool ActionsReClicked = false;
         bool ActionPanelShowing = false;
+        bool AskedIfProcRunning = false;
+        bool AskedForDensity = false;
+        bool AskedForZfactor = false;
+        bool AskedForThickness = false;
+        bool AskedForCurrentRunNO = false;
+        bool AskedForLastRunNO = false;
+        bool AskedForDepRate = false;
+        bool AskedForRunTime = false;
+        bool BuildString2Write = false;
         bool CollectionRunning = false;
         bool MinimizeSoon = false;
         bool MouseOnPanel = false;
         bool PanelIsMoving = false;
+        bool RecordData = false;
         bool SettingsClicked = false;
         bool SettingsReClicked = false;
         bool SettingsPanelShowing = false;
         int x = 0;
         string[] portNames = new string[10];
-        string[] Machines = { "PVD", "Lesker", "Leybold", "Veeco", "PCD Sputt", "CHA", "AIRCO", "Varian" };
+        string[] Machines = { "PVD", "Lesker", "Leybold", "Veeco", "PVD Sputt", "CHA", "AIRCO", "Varian" };
         string BaseFileName = "MetalDep_CollectedData";
         string CurrentFileName = "";
+        string CurrentRunNO = "";
+        string CurrentDensity = "";
+        string CurrentZfactor = "";
+        string CurrentThickness = "";
+        string CurrentDepRate = "";
+        string CurrentRunTime = "";
+        string CurrentMaterial = "";
+        string CurrentSymbol = "";
+        string LastRunNO = "";
+        string StoreRunNO = "";
         string RX_Data = "";
         string tempString = "";
         #endregion
@@ -67,7 +88,7 @@ namespace MetalDep
                 //write column headers for csv file
                 using (StreamWriter SW = new StreamWriter(CurrentFileName, true))   //true makes it append to the file instead of overwrite
                 {
-                    SW.WriteLine("Material, Thickness, Run/Lot#"); //column headers for csv
+                    SW.WriteLine("Run/Lot#, Material, Symbol, Ending Thickness, Density, Z Factor, Deposition Rate, Running Time"); //column headers for csv
                     SW.Close();
                 }
             }
@@ -82,27 +103,6 @@ namespace MetalDep
         {
             //this needs validation, check if collection is running etc...
             this.Close();
-        }
-
-        private void ActionsMenuToggle(object sender, EventArgs e)
-        {
-            //show the action panel
-            if (!PanelIsMoving)
-            {
-                if (ActionsClicked)
-                {
-                    ActionsReClicked = true;
-                    if(SettingsPanelShowing)
-                    {
-                        btnSettings_Click(sender, e); //hide settings panel first
-                    }
-                }
-                else
-                {
-                    ActionsClicked = true;
-                }
-                FatherTime.Enabled = true;
-            }
         }
 
         private void frmMetalDep_FormClosing(object sender, FormClosingEventArgs e)
@@ -222,8 +222,8 @@ namespace MetalDep
                         txtbxOutput.Text = "Collecting Data in file: " + CurrentFileName;
 
                         // this shows the operation of csv creation
-                        WriteToFile("Silver,0.2,11");
-                        WriteToFile("Gold,0.1,12");
+                        //WriteToFile("Silver,0.2,11");
+                        //WriteToFile("Gold,0.1,12");
 
 
                         //start data collection...
@@ -232,7 +232,8 @@ namespace MetalDep
                         ActionsMenuToggle(sender, e); //hide action panel
                         btnStart.Text = "Stop Collection";
 
-                        //SendMSG(EXCT_whatv); 
+                        //initiate communication
+                        SendMSG(cmd880.EXCT_prac+","+cmd880.Param.PA_rnno); //ask for the run # 
 
                         if (chkbxMinimize.Checked)
                         {
@@ -289,13 +290,21 @@ namespace MetalDep
                             //blah
                             break;
                         case ("Leybold"):
-                            //blah
                             Communicate2Inficon880(RX_Data);
                             break;
                         case ("Veeco"):
                             //blah
                             break;
-                        case ("PCD Sputt"):
+                        case ("PVD Sputt"):
+                            //blah
+                            break;
+                        case ("CHA"):
+                            //blah
+                            break;
+                        case ("Varian"):
+                            //blah
+                            break;
+                        case ("AIRCO"):
                             //blah
                             break;
                         default:
@@ -412,17 +421,6 @@ namespace MetalDep
             btnSettings_Click(sender, e);
         }
 
-        private void Communicate2Inficon880(string DataRXd)
-        {
-            //for testing
-            DispMsg("We received this: " + Environment.NewLine + DataRXd);
-            if (chkbxDebug.Checked)
-            {
-                DisplaySerialData_Hex(DataRXd);
-            }
-
-        }
-
         /*Modified method, courtesy of: http://csharpindepth.com/Articles/General/strings.aspx */
         private void DisplaySerialData_Hex(string chars2disp)
         {
@@ -517,6 +515,32 @@ namespace MetalDep
             {
                 DispMsg("serial message send fail");
             }
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            txtbxOutput.Clear();
+        }
+
+        private int WhatMaterial(string Density, string ZFactor)
+        {
+            double tmpDens = Convert.ToDouble(Density);
+            double tmpZf = Convert.ToDouble(ZFactor);
+            int elementNum = 0;
+            int i = 0;
+
+            for (i = 0; i < materials.Length; i++)
+            {
+                if (tmpDens == ElementTable.Density[i])
+                {
+                    if (tmpZf == ElementTable.Zfactor[i])
+                    {
+                        elementNum = i; //this is the material
+                    }
+                }
+            }
+
+            return elementNum;
         }
     }
 }

@@ -172,21 +172,35 @@ namespace MetalDep
         public struct ReturnVal
         {   
                                //Following ACK/RESET
-            public string AOK; // A/B
-            public string ILCD; // F/G
-            public string ILDV; // H/I
-            public string ILSN; // J/K
-            public string INHB; // L/M
-            public string OBSOI;// R/S
+            public char AOK; // A
+            public char AOKR; //B
+            public char ILCD; // F
+            public char ILCDR; //G
+            public char ILDV; // H
+            public char ILDVR; //I
+            public char ILSN; // J
+            public char ILSNR; // K
+            public char INHB; // L
+            public char INHBR; //M
+            public char OBSOI; // R
+            public char OBSOIR; //S
 
-            public ReturnVal(string aok, string ilcd, string ildv, string ilsn, string inhb, string obsoi)
+            public ReturnVal(char aok, char ilcd, char ildv, char ilsn, char inhb,
+                            char obsoi, char aokr, char ilcdr, char ildvr, char ilsnr,
+                            char inhbr, char obsoir)
             {
                 AOK = aok;
+                AOKR = aokr;
                 ILCD = ilcd;
+                ILCDR = ilcdr;
                 ILDV = ildv;
+                ILDVR = ildvr;
                 ILSN = ilsn;
+                ILSNR = ilsnr;
                 INHB = inhb;
+                INHBR = inhbr;
                 OBSOI = obsoi;
+                OBSOIR = obsoir;
             }
 
         }
@@ -202,12 +216,18 @@ namespace MetalDep
             ElementTable.Zfactor = zfactors;
 
             /*** Return Values ***/
-            ReturnValue.AOK = "A"; //all values assume normal start, non-reset
-            ReturnValue.ILCD = "F";
-            ReturnValue.ILDV = "H";
-            ReturnValue.ILSN = "J";
-            ReturnValue.INHB = "L";
-            ReturnValue.OBSOI = "R";
+            ReturnValue.AOK = 'A'; //all values assume normal start, unless ending in r for reset
+            ReturnValue.AOKR = 'B';
+            ReturnValue.ILCD = 'F';
+            ReturnValue.ILCDR = 'G';
+            ReturnValue.ILDV = 'H';
+            ReturnValue.ILDVR = 'I';
+            ReturnValue.ILSN = 'J';
+            ReturnValue.ILSNR = 'K';
+            ReturnValue.INHB = 'L';
+            ReturnValue.INHBR = 'M';
+            ReturnValue.OBSOI = 'R';
+            ReturnValue.OBSOIR = 'S';
 
             /***Commands***/
 

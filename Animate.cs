@@ -14,6 +14,27 @@ namespace MetalDep
 {
     public partial class frmMetalDep : Form
     {
+        private void ActionsMenuToggle(object sender, EventArgs e)
+        {
+            //show the action panel
+            if (!PanelIsMoving)
+            {
+                if (ActionsClicked)
+                {
+                    ActionsReClicked = true;
+                    if (SettingsPanelShowing)
+                    {
+                        btnSettings_Click(sender, e); //hide settings panel first
+                    }
+                }
+                else
+                {
+                    ActionsClicked = true;
+                }
+                FatherTime.Enabled = true;
+            }
+        }
+
         private void FatherTime_Tick(object sender, EventArgs e)
         {
             #region Panel Actions Animate

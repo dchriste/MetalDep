@@ -67,7 +67,7 @@
             "Lesker",
             "Leybold",
             "Veeco",
-            "PCD Sputt",
+            "PVD Sputt",
             "CHA",
             "AIRCO",
             "Varian"});
@@ -280,6 +280,7 @@
             this.btnClear.TabIndex = 3;
             this.btnClear.Text = "Clear Collected";
             this.btnClear.UseVisualStyleBackColor = false;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             this.btnClear.MouseMove += new System.Windows.Forms.MouseEventHandler(this.btnClear_MouseMove);
             // 
             // txtbxOutput
