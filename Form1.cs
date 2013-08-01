@@ -1,4 +1,22 @@
-﻿using System;
+﻿
+/*******************************************************************************
+ * Copyright (C) 2013  David V. Christensen
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -44,7 +62,10 @@ namespace MetalDep
         bool SettingsClicked = false;
         bool SettingsReClicked = false;
         bool SettingsPanelShowing = false;
+        byte[] RX_Buff = new byte[18]; 
         int x = 0;
+        int SerialPoll_Ticks = 0;
+        int SerialPoll_WaitTime = 5; //change the poll interval for the dep check
         string[] portNames = new string[10];
         string[] Machines = { "PVD", "Lesker", "Leybold", "Veeco", "PVD Sputt", "CHA", "AIRCO", "Varian" };
         string BaseFileName = "MetalDep_CollectedData";
@@ -92,10 +113,13 @@ namespace MetalDep
                     SW.Close();
                 }
             }
-            using (StreamWriter SW = new StreamWriter(CurrentFileName, true))   //true makes it append to the file instead of overwrite
+            if (data2write != "")
             {
-                SW.WriteLine(data2write);
-                SW.Close();
+                using (StreamWriter SW = new StreamWriter(CurrentFileName, true))   //true makes it append to the file instead of overwrite
+                {
+                    SW.WriteLine(data2write);
+                    SW.Close();
+                }
             }
         }
 
@@ -109,6 +133,11 @@ namespace MetalDep
         {
             //handle close events here
             //prompt about running collections!!
+            if (btnStart.Text == "Stop Collection")
+            {
+                DispMsg("Collection Running!!!! Stop collection for safety."); 
+            }
+
             string message = "Do you really want to quit?!?    :(    ";
 
             string caption = "The Program is Closing!";
@@ -177,7 +206,6 @@ namespace MetalDep
 
             serialCOMcmbbx_Click(sender, e);//pre-load the combobox
 
-
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -224,6 +252,7 @@ namespace MetalDep
                         // this shows the operation of csv creation
                         //WriteToFile("Silver,0.2,11");
                         //WriteToFile("Gold,0.1,12");
+                        WriteToFile(""); //create file with headers
 
 
                         //start data collection...
@@ -233,7 +262,8 @@ namespace MetalDep
                         btnStart.Text = "Stop Collection";
 
                         //initiate communication
-                        SendMSG(cmd880.EXCT_prac+","+cmd880.Param.PA_rnno); //ask for the run # 
+                        SendMSGwChkSm(cmd880.EXCT_whatv); //ask for the version 
+                        //SendMSG(cmd880.EXCT_rstat + cmd880.Param.RNMD);
 
                         if (chkbxMinimize.Checked)
                         {
@@ -263,14 +293,31 @@ namespace MetalDep
 
         private void timer_SerialRead_Tick(object sender, EventArgs e)
         {
-            //string tmp_str = "";
+            char tmp_chr = ' ';
+            int lengthOfMessage = ' ';
+            int i = 0;
+            int chksum = 0;
             if (SerialPort.IsOpen == true)
-            {
+            {      
                 SerialPort.ReadTimeout = 10; //in miliseconds
                 tempString = null;
                 try
                 {
-                    tempString = SerialPort.ReadLine();
+                    //tempString = SerialPort.ReadLine();
+                    tmp_chr = (char)SerialPort.ReadByte();
+                    if (tmp_chr == '\x02')
+                    {
+                        lengthOfMessage = (int)SerialPort.ReadByte();
+                        for (i = 0; i < lengthOfMessage; i++)
+                        {
+                            RX_Buff[i] = (byte)SerialPort.ReadByte();
+                        }
+                    }
+                    chksum = SerialPort.ReadByte();
+                    for (i = 0; i < RX_Buff.Length; i++)
+                    {
+                        tempString += (char)RX_Buff[i];
+                    }
                 }
                 catch { }
 
@@ -279,38 +326,53 @@ namespace MetalDep
                     //MessageBox.Show(tempString); //testing
                     RX_Data = tempString;
                     tempString = null;
-                    
+
                     //call function to parse data?
                     switch (cmbxMachine.Items[cmbxMachine.SelectedIndex].ToString())
                     {
                         case ("PVD"):
                             //blah
-                            break;
+                            //break;
                         case ("Lesker"):
                             //blah
-                            break;
+                            //break;
                         case ("Leybold"):
-                            Communicate2Inficon880(RX_Data);
-                            break;
+                            //Communicate2Inficon880(RX_Data);
+                            //break;
                         case ("Veeco"):
                             //blah
-                            break;
+                            //break;
                         case ("PVD Sputt"):
                             //blah
-                            break;
+                            //break;
                         case ("CHA"):
                             //blah
-                            break;
+                           // break;
                         case ("Varian"):
                             //blah
-                            break;
+                            //break;
                         case ("AIRCO"):
                             //blah
-                            break;
+                            //break;
                         default:
-                            //what happened??!!??
-                            DispMsg("REALLY!?!?");
+                            Communicate2Inficon880(RX_Data);
                             break;
+                    }
+                }
+                else
+                {
+                    //tempString is null, increment counter poll for changed run #
+                    if ((SerialPoll_Ticks < SerialPoll_WaitTime)  && !RecordData)
+                    {
+                        SerialPoll_Ticks++;
+                    }
+                    else
+                    {
+                        //5 seconds has elapsed since hearing from the device
+                        //get the current run #
+                        SendMSGwChkSm(cmd880.EXCT_rdsp + cmd880.Param.RUNNO);
+                        AskedForCurrentRunNO = true;
+                        SerialPoll_Ticks = 0; //reset ticks
                     }
                 }
             }
@@ -326,7 +388,7 @@ namespace MetalDep
             {
                 this.Text = "Metal Deposition " + (CollectionRunning ? "| (Running) " : "| (Idle) ");
             }
-
+                        
             //change the way we talk based on machine
             //done in serial timer tick event
         }
@@ -504,8 +566,28 @@ namespace MetalDep
                 txtbxOutput.ScrollBars = ScrollBars.None;
             }
         }
+        /*Attempts to communicate with the sycon error checking protocol used by the 880*/
+        private void SendMSGwChkSm(string Message2Send)
+        {
+            if (SerialPort.IsOpen == true)
+            {
+                //perform checksum
+                byte check = GetChecksum(Message2Send);
+                byte length = (byte)Message2Send.Length;
+                //byte[] bytes = Encoding.ASCII.GetBytes("\x02" + ToUnprintableHex(length) + Message2Send + Convert.ToChar(check)); // convert to raw bytes
 
-        private void SendMSG(string Message2Send)
+                // + "\x0D"
+                //SerialPort.WriteLine("\x02" + ToUnprintableHex(length) + Message2Send + (char)check); // stx (Data_Length) (DATA) (Checksum)
+                SerialPort.Write("\x02" + ToUnprintableHex(length) + Message2Send + Convert.ToChar(check));
+                //DisplaySerialData_Hex("\x02" + ToUnprintableHex(length) + Message2Send + Convert.ToChar(check));
+            }
+            else
+            {
+                DispMsg("serial message send fail");
+            }
+        }
+
+        private void SendMSGwASCII(string Message2Send)
         {
             if (SerialPort.IsOpen == true)
             {
@@ -541,6 +623,76 @@ namespace MetalDep
             }
 
             return elementNum;
+        }
+
+        private string ToUnprintableHex(int length)
+        {
+            string hexOutput = "";
+
+            switch (length)
+            {
+                case (1):
+                    hexOutput = "\x01";
+                    break;
+                case (2):
+                    hexOutput = "\x02";
+                    break;
+                case (3):
+                    hexOutput = "\x03";
+                    break;
+                case (4):
+                    hexOutput = "\x04";
+                    break;
+                case (5):
+                    hexOutput = "\x05";
+                    break;
+                case (6):
+                    hexOutput = "\x06";
+                    break;
+                case (7):
+                    hexOutput = "\x07";
+                    break;
+                case (8):
+                    hexOutput = "\x08";
+                    break;
+                case (9):
+                    hexOutput = "\x09";
+                    break;
+                case (10):
+                    hexOutput = "\x0A";
+                    break;
+                case (11):
+                    hexOutput = "\x0B";
+                    break;
+                case (12):
+                    hexOutput = "\x0C";
+                    break;
+                case (13):
+                    hexOutput = "\x0D";
+                    break; 
+                default:
+                    hexOutput = "\x00";
+                    break;
+            }
+            
+            return hexOutput;
+        }
+
+        private byte GetChecksum(string data)
+        {
+            byte[] dataArr = Encoding.ASCII.GetBytes(data);
+            byte check = 0;
+            byte length = (byte)data.Length;
+            /**Method 1 & 2 addition and XOR **/
+            for (int i = 0; i < dataArr.Length; i++)
+            {
+                //check ^= dataArr[i];
+                check += dataArr[i];
+            }
+            //check = (byte)(-check);
+            check = (byte)(256 - ((uint)check%256));
+
+            return check;
         }
     }
 }

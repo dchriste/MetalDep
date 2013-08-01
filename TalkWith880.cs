@@ -1,4 +1,21 @@
-﻿using System;
+﻿/*******************************************************************************
+ * Copyright (C) 2013  David V. Christensen
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,15 +35,22 @@ namespace MetalDep
         {
             char firstChar = ' ';
             int tmpint = 0;
+            int lengthOfMessage = 0;
+            byte checkSum = 0;
             string Str2Write = "";
+            DataRXd = DataRXd.TrimStart('\x02'); //stx
+            lengthOfMessage = DataRXd[0];
+            DataRXd = DataRXd.TrimStart((char)lengthOfMessage);
             firstChar = DataRXd[0];
             firstChar.ToString().ToUpper().ToCharArray();
+            checkSum = (byte)DataRXd[lengthOfMessage];
+            DataRXd = DataRXd.TrimEnd((char)checkSum);
 
             if (firstChar == ReturnValue.AOK || firstChar == ReturnValue.AOKR)
             {
-                //host ack'd
-                DataRXd.TrimStart(ReturnValue.AOK);
-                DataRXd.TrimStart(ReturnValue.AOKR);
+                //host ack'd                
+                DataRXd = DataRXd.TrimStart(ReturnValue.AOK);
+                DataRXd = DataRXd.TrimStart(ReturnValue.AOKR);
                 //do whatever should happen with good reply
                 DispMsg(DataRXd + " was an AOK reply");
 
@@ -34,13 +58,13 @@ namespace MetalDep
                 {
                     if (!AskedIfProcRunning && !AskedForCurrentRunNO)// yet to check if the machine is running a process
                     {
-                        SendMSG(cmd880.EXCT_rstat + "," + cmd880.Param.RNMD); //should ask if something is running
+                        SendMSGwChkSm(cmd880.EXCT_rstat + cmd880.Param.RNMD); //should ask if something is running
                         AskedIfProcRunning = true;
                     }
                     else if (AskedIfProcRunning && (Convert.ToDouble(DataRXd) != 0) && CurrentRunNO == "") //a process is running
                     {
                         //get the current run #
-                        SendMSG(cmd880.EXCT_rdsp + "," + cmd880.Param.RUNNO);
+                        SendMSGwChkSm(cmd880.EXCT_rdsp + cmd880.Param.RUNNO);
                         AskedIfProcRunning = false;
                         AskedForCurrentRunNO = true;
                     }
@@ -58,7 +82,7 @@ namespace MetalDep
                 else if (!AskedForCurrentRunNO && !RecordData)//this will usually be the case, rather than the 1st condition
                 {
                     //get the current run #
-                    SendMSG(cmd880.EXCT_rdsp + "," + cmd880.Param.RUNNO);
+                    SendMSGwChkSm(cmd880.EXCT_rdsp + cmd880.Param.RUNNO);
                     AskedForCurrentRunNO = true;
                 }
                 else if (AskedForCurrentRunNO)
@@ -70,7 +94,7 @@ namespace MetalDep
                         if (Convert.ToDouble(CurrentRunNO) > Convert.ToDouble(LastRunNO))
                         {
                             RecordData = true; // a new run as begun 
-                            SendMSG(cmd880.EXCT_prac + "," + cmd880.Param.PA_rnno); //job accounting runno
+                            SendMSGwChkSm(cmd880.EXCT_prac + cmd880.Param.PA_rnno); //job accounting runno
                             AskedForLastRunNO = true;
                             LastRunNO = DataRXd;
                         }
@@ -93,7 +117,7 @@ namespace MetalDep
                         //store Run #
                         StoreRunNO = DataRXd;
                         //ask for Density
-                        SendMSG(cmd880.EXCT_rdfp + "," + cmd880.Param.DENS);
+                        SendMSGwChkSm(cmd880.EXCT_rdfp + cmd880.Param.DENS);
                         AskedForDensity = true;
                         AskedForLastRunNO = false;
                     }
@@ -102,7 +126,7 @@ namespace MetalDep
                         //store Density
                         CurrentDensity = DataRXd;
                         //ask for Zfactor
-                        SendMSG(cmd880.EXCT_rdfp + "," + cmd880.Param.ZRAT);
+                        SendMSGwChkSm(cmd880.EXCT_rdfp + cmd880.Param.ZRAT);
                         AskedForDensity = false;
                         AskedForZfactor = true;
                     }
@@ -111,7 +135,7 @@ namespace MetalDep
                         //store Zfactor
                         CurrentZfactor = DataRXd;
                         //ask for thickness (if run ended)
-                        SendMSG(cmd880.EXCT_prac + "," + cmd880.Param.PA_ethk); //ending thickness
+                        SendMSGwChkSm(cmd880.EXCT_prac + cmd880.Param.PA_ethk); //ending thickness
                         AskedForZfactor = false;
                         AskedForThickness = true;
                     }
@@ -120,7 +144,7 @@ namespace MetalDep
                         //store thickness
                         CurrentThickness = DataRXd;
                         //ask for DepRate
-                        SendMSG(cmd880.EXCT_prac + "," + cmd880.Param.PA_erate); //ending rate
+                        SendMSGwChkSm(cmd880.EXCT_prac + cmd880.Param.PA_erate); //ending rate
                         AskedForThickness = false;
                         AskedForDepRate = true;
                     }
@@ -129,7 +153,7 @@ namespace MetalDep
                         //store deprate
                         CurrentDepRate = DataRXd;
                         //ask for RunTime
-                        SendMSG(cmd880.EXCT_prac + "," + cmd880.Param.PA_tproc);//time to idle or stop
+                        SendMSGwChkSm(cmd880.EXCT_prac + cmd880.Param.PA_tproc);//time to idle or stop
                         AskedForDepRate = false;
                         AskedForRunTime = true;
                     }
@@ -156,11 +180,32 @@ namespace MetalDep
                     }
                 }
             }
-            else
+            else if (firstChar == ReturnValue.ILCD || firstChar == ReturnValue.ILCDR)
             {
-                DispMsg("There were issues with this message, we " + Environment.NewLine +
-                        "did not receive the AOK from the machine.");
+                DispMsg("The previous command was an Illegal Command" + Environment.NewLine +
+                        "Consult the manual for proper formatting.");
             }
+            else if (firstChar == ReturnValue.ILDV || firstChar == ReturnValue.ILDVR)
+            {
+                DispMsg("The previous command was an Illegal Data Value" + Environment.NewLine +
+                        "Consult the manual for proper parameters.");
+            }
+            else if (firstChar == ReturnValue.ILSN || firstChar == ReturnValue.ILSNR)
+            {
+                DispMsg("The previous command used Illegal Syntax" + Environment.NewLine +
+                        "Consult the manual for proper syntax.");
+            }
+            else if (firstChar == ReturnValue.INHB || firstChar == ReturnValue.INHBR)
+            {
+                DispMsg("The previous command called for an Inhibited Operation" + Environment.NewLine +
+                        "The machine is not able to process now.");
+            }
+            else if (firstChar == ReturnValue.OBSOI || firstChar == ReturnValue.OBSOIR)
+            {
+                DispMsg("The previous command was an obsolete command" + Environment.NewLine +
+                        "Consult the manual for proper commands.");
+            }
+
 
             //for testing
             //DispMsg("We received this: " + Environment.NewLine + DataRXd);

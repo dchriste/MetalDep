@@ -66,5 +66,17 @@ namespace MetalDep.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {\rtf1\ansi\deff4\adeflang1025
+        ///{\fonttbl{\f0\froman\fprq2\fcharset0 Times New Roman;}{\f1\froman\fprq2\fcharset2 Symbol;}{\f2\fswiss\fprq2\fcharset0 Arial;}{\f3\froman\fprq2\fcharset128 Times New Roman;}{\f4\fnil\fprq0\fcharset128 Delicious;}{\f5\fnil\fprq0\fcharset128 Arial Black;}{\f6\fnil\fprq2\fcharset128 WenQuanYi Zen Hei;}{\f7\fnil\fprq2\fcharset128 Lohit Devanagari;}{\f8\fnil\fprq0\fcharset128 Lohit Devanagari;}}
+        ///{\colortbl;\red0\green0\blue0;\red128\green128\blue128;}
+        ///{\stylesheet{\s0\snext0\nowidct [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string License {
+            get {
+                return ResourceManager.GetString("License", resourceCulture);
+            }
+        }
     }
 }
